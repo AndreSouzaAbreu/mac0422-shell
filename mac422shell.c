@@ -72,6 +72,7 @@ int main(int argc, char** argv)
             continue;
         }
     }
+    printf("\n");
 
     return 0;
 }
