@@ -1,0 +1,9 @@
+# ignore files without extensions, except for Makefile
+*
+!/**/
+!*.*
+!Makefile
+
+# ignore compiled assets
+*.o
+*.out
