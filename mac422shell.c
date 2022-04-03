@@ -157,9 +157,12 @@ int rode_veja(char* filepath)
 
     /* this is the parent process */
     /* wait for child process to terminate, and try to get its exit status */
-    if (waitpid(pid, &exit_status, 0) == -1) {
+    wait(&exit_status);
+    if (exit_status == -1) {
         printf("ERROR: erro ao rodar o programa %s\n", filepath);
     } else {
+        /* the status is multiplied by 256, thus needs to convert it */
+        exit_status /= 256;
         printf("=> programa '%s' retornou codigo %d\n", filepath, exit_status);
     }
 
