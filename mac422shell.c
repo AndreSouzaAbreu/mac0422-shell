@@ -143,22 +143,43 @@ int libera_geral(char* filepath)
 /* runs a program on foreground and wait for it to complete */
 int rode_veja(char* filepath)
 {
-    int exit_status, pid;
-    char** argv, ** env;
+    char** argv, ** envv;
+    int pid, exit_status;
 
-    argv = NULL;
-    env = NULL;
+    /* intialize argv vector */
+    argv = malloc(sizeof(char)*2);
+    argv[0] = filepath;
+    argv[1] = NULL;
+
+    /* initialize envv vector */
+    envv = malloc(sizeof(char));
+    envv[0] = NULL;
+
+    /* fork process */
     pid = fork();
 
     /* this is the child process */
-    /* execute program and quit */
     if (pid == 0) {
-        exit(execve(filepath, argv, env));
+
+        /* execute program and get its status */
+        exit_status = execve(filepath, argv, envv);
+
+        /* free allocated memory */
+        free(argv);
+        free(envv);
+
+        /* exit */
+        exit(exit_status);
     }
+
+    /* free memory since parent process wont' use it */
+    free(argv);
+    free(envv);
 
     /* this is the parent process */
     /* wait for child process to terminate, and try to get its exit status */
-    wait(&exit_status);
+    waitpid(pid, &exit_status, 0);
+
     if (exit_status == -1) {
         printf("ERROR: erro ao rodar o programa %s\n", filepath);
     } else {
@@ -173,18 +194,38 @@ int rode_veja(char* filepath)
 /* runs a program on the background */
 int rode(char* filepath)
 {
-    char** argv, ** env;
-    int pid;
+    char** argv, ** envv;
+    int pid, exit_status;
 
-    argv = NULL;
-    env = NULL;
+    /* intialize argv vector */
+    argv = malloc(sizeof(char)*2);
+    argv[0] = filepath;
+    argv[1] = NULL;
+
+    /* initialize envv vector */
+    envv = malloc(sizeof(char));
+    envv[0] = NULL;
+
+    /* fork process */
     pid = fork();
 
     /* this is the child process */
-    /* execute program and quit */
     if (pid == 0) {
-        exit(execve(filepath, argv, env));
+
+        /* execute program and get its status */
+        exit_status = execve(filepath, argv, envv);
+
+        /* free allocated memory */
+        free(argv);
+        free(envv);
+
+        /* exit */
+        exit(exit_status);
     }
+
+    /* free memory since parent process wont' use it */
+    free(argv);
+    free(envv);
 
     return 0;
 }
