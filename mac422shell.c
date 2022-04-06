@@ -84,7 +84,8 @@ int main(int argc, char** argv)
  */
 
 /* Check if the given command is valid */
-int cmd_exists(char* cmd) {
+int cmd_exists(char* cmd)
+{
     return (get_cmd_index(cmd) != -1);
 }
 
@@ -101,20 +102,23 @@ int get_cmd_index(char* cmd)
 }
 
 /* execute the given command, passing an argument to it */
-int call_cmd(char* cmd, char* arg) {
+int call_cmd(char* cmd, char* arg)
+{
     int cmd_index;
     cmd_index = get_cmd_index(cmd);
     return CMD_LIST[cmd_index](arg);
 }
 
 /* read the command from standard input */
-int read_cmd(char* cmd, char* arg) {
+int read_cmd(char* cmd, char* arg)
+{
     print_prompt();
     return scanf("%s %s", cmd, arg);
 }
 
 /* print shell prompt to standard output */
-void print_prompt(void) {
+void print_prompt(void)
+{
     printf("> ");
 }
 
