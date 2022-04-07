@@ -7,3 +7,4 @@
 # ignore compiled assets
 *.o
 *.out
+*.pdf
