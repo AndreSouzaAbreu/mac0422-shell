@@ -67,7 +67,7 @@ int main(int argc, char** argv)
             continue;
         }
         /* execute command */
-        if (call_cmd(cmd, arg) != 0) {
+        if (call_cmd(cmd, arg) < 0) {
             printf("ERROR: could not run command\n");
             continue;
         }
@@ -144,11 +144,19 @@ int libera_geral(char* filepath)
     return chmod(filepath, mask);
 }
 
-/* runs a program on foreground and wait for it to complete */
-int rode_veja(char* filepath)
+/* runs a program on the background */
+int rode(char* filepath)
 {
     char** argv, ** envv;
     int pid, exit_status;
+
+    pid = fork(); /* fork process */
+
+    if (pid != 0) { /* this is the parent process */
+        return pid; /* return the pid to be used elsewhere */
+    }
+
+    /* this is the child process */
 
     /* intialize argv vector */
     argv = malloc(sizeof(char)*2);
@@ -159,26 +167,24 @@ int rode_veja(char* filepath)
     envv = malloc(sizeof(char));
     envv[0] = NULL;
 
-    /* fork process */
-    pid = fork();
+    /* execute program and get its status */
+    exit_status = execve(filepath, argv, envv);
 
-    /* this is the child process */
-    if (pid == 0) {
-
-        /* execute program and get its status */
-        exit_status = execve(filepath, argv, envv);
-
-        /* free allocated memory */
-        free(argv);
-        free(envv);
-
-        /* exit */
-        exit(exit_status);
-    }
-
-    /* free memory since parent process wont' use it */
+    /* free allocated memory */
     free(argv);
     free(envv);
+
+    /* exit */
+    exit(exit_status);
+}
+
+/* runs a program on foreground and wait for it to complete */
+int rode_veja(char* filepath)
+{
+    int pid, exit_status;
+
+    /* `fork the process, run the program, and get the child's pid */
+    pid = rode(filepath);
 
     /* this is the parent process */
     /* wait for child process to terminate, and try to get its exit status */
@@ -191,45 +197,6 @@ int rode_veja(char* filepath)
         exit_status /= 256;
         printf("=> programa '%s' retornou codigo %d\n", filepath, exit_status);
     }
-
-    return 0;
-}
-
-/* runs a program on the background */
-int rode(char* filepath)
-{
-    char** argv, ** envv;
-    int pid, exit_status;
-
-    /* intialize argv vector */
-    argv = malloc(sizeof(char)*2);
-    argv[0] = filepath;
-    argv[1] = NULL;
-
-    /* initialize envv vector */
-    envv = malloc(sizeof(char));
-    envv[0] = NULL;
-
-    /* fork process */
-    pid = fork();
-
-    /* this is the child process */
-    if (pid == 0) {
-
-        /* execute program and get its status */
-        exit_status = execve(filepath, argv, envv);
-
-        /* free allocated memory */
-        free(argv);
-        free(envv);
-
-        /* exit */
-        exit(exit_status);
-    }
-
-    /* free memory since parent process wont' use it */
-    free(argv);
-    free(envv);
 
     return 0;
 }
