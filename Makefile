@@ -21,6 +21,10 @@ PAPER_PDF := ${PAPER}.pdf
 
 ${BIN}:
 
+theo:
+	gcc -Wall -Wextra mac422shellTheo.c -o tmac422shell
+	gcc test.c -o test
+
 build: ${BIN}
 
 install: build
