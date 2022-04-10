@@ -167,15 +167,8 @@ int rode(char* filepath)
     envv = malloc(sizeof(char));
     envv[0] = NULL;
 
-    /* execute program and get its status */
-    exit_status = execve(filepath, argv, envv);
-
-    /* free allocated memory */
-    free(argv);
-    free(envv);
-
-    /* exit */
-    exit(exit_status);
+    /* execute program, return -1 if fails */
+    return execve(filepath, argv, envv);
 }
 
 /* runs a program on foreground and wait for it to complete */
@@ -183,7 +176,7 @@ int rode_veja(char* filepath)
 {
     int pid, exit_status;
 
-    /* `fork the process, run the program, and get the child's pid */
+    /* fork the process, run the program, and get the child's pid */
     pid = rode(filepath);
 
     /* this is the parent process */
@@ -194,8 +187,7 @@ int rode_veja(char* filepath)
         printf("ERROR: erro ao rodar o programa %s\n", filepath);
     } else {
         /* the status is multiplied by 256, thus needs to convert it */
-        exit_status /= 256;
-        printf("=> programa '%s' retornou codigo %d\n", filepath, exit_status);
+        printf("=> programa '%s' retornou codigo %d\n", filepath, WEXITSTATUS(exit_status));
     }
 
     return 0;
