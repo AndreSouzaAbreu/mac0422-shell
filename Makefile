@@ -1,5 +1,5 @@
 CC := cc
-CFLAGS := -Wall
+CFLAGS := -Wall -Wextra -ansi
 
 BIN := mac422shell
 SRC := ${BIN}.c

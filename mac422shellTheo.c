@@ -1,5 +1,5 @@
 /* Compile com:
- *   cc -Wpedantic -Wall -Wextra mac422shell.c -o mac422shell
+ *   cc -Wpedantic -Wall -Wextra -ansi mac422shell.c -o mac422shell
  */
 
 #include <stdio.h>
@@ -26,9 +26,10 @@ void printString (char *s)
     size_t i = 0;
     while (s[i] != 0)
         fprintf(stderr, "%c,", s[i++]);
-    puts("");
+    fputs("", stderr);
 }
 
+/* This function implements the 'protegepracaramba' shell's command. */
 void protege(char *line)
 {
     int status = 0;
@@ -37,6 +38,7 @@ void protege(char *line)
         printErrnoString("Chmod error");
 }
 
+/* This function implements the 'liberageral' shell's command. */
 void libera(char *line)
 {
     int status = 0;
@@ -45,11 +47,13 @@ void libera(char *line)
         printErrnoString("Chmod error");
 }
 
+/* This function implements the 'rodeveja' shell's command. */
 void rodeVeja(char *line)
 {
     int status;
     pid_t child;
-    char *argv[] = {line, NULL}, *env[] = {NULL};
+    char *argv[] = {NULL, NULL}, *env[] = {NULL};
+    argv[0] = line;
     child = fork();
     if (child == -1)
         printErrnoString("Fork error");
@@ -70,10 +74,12 @@ void rodeVeja(char *line)
     }
 }
 
+/* This function implements the 'rode' shell's command. */
 void rode(char *line)
 {
     int status;
-    char *argv[] = {line, NULL}, *env[] = {NULL};
+    char *argv[] = {NULL, NULL}, *env[] = {NULL};
+    argv[0] = line;
 
     status = fork();
     if (status == -1)
@@ -92,24 +98,69 @@ void rode(char *line)
     }
 }
 
-int charIsNotSpace(char c) {
+int charIsNotSpace(char c)
+{
     return c != ' ' && c != '\n' && c != 0;
 }
 
-int charIsNotEnd(char c) {
+int charIsNotEnd(char c)
+{
     return c != '\n' && c != 0;
 }
 
-int getLine(char *buffer, FILE *fd)
+/* This function reads stream until it finds an EOF or a newline, and stores at
+ * most MAXLINE-1 characters in buffer.  It returns the number of characters
+ * read.
+ */
+int getLine(char *buffer, FILE *stream)
 {
     int size = 0;
 
-    if (fgets(buffer, MAXLINE, fd) == NULL)
+    if (fgets(buffer, MAXLINE, stream) == NULL)
         return 0;
     while (charIsNotEnd(buffer[size])) size++;
     buffer[size] = 0;
     return size;
 }
+
+void printPrompt(const char *prompt, FILE *stream)
+{
+    fputs(prompt, stream);
+}
+
+/* This function copies the first word (contiguous sequence of nonspace
+ * characters) of 'buffer' to 'command'.
+ */
+int copyCommandFromBuffer(char *command, char *buffer, int maxLength)
+{
+    int i = 0;
+    for (i = 0; i < maxLength-1 && charIsNotSpace(buffer[i]); i++)
+        command[i] = buffer[i];
+    command[i] = 0;
+    return i;
+}
+
+/* This function calls the function corresponding to 'command' argument string
+ * and passes 'argline' as parameter to it.
+ */
+int executeCommand(char *command, char *argline)
+{
+    if (strcmp(command, PROTEGE) == 0)
+        protege(argline);
+    else if (strcmp(command, LIBERA) == 0)
+        libera(argline);
+    else if (strcmp(command, RODEVEJA) == 0)
+        rodeVeja(argline);
+    else if (strcmp(command, RODE) == 0)
+        rode(argline);
+    else if (strcmp(command, EXITCMD) == 0)
+        return -1;
+    else {
+        return 0;
+    }
+    return 1;
+}
+
 
 int main()
 {
@@ -117,36 +168,26 @@ int main()
     int status, i, minSize;
 
     while (1) {
-        fputs("\n$ ", stderr);
+        printPrompt("\n$ ", stderr);
         status = getLine(buffer, stdin);  
 
         if (status == 0) break;
 
         minSize = MIN(status, MAXCMD);
-        for (i = 0; i < minSize && charIsNotSpace(buffer[i]); i++)
-            command[i] = buffer[i];
+        i = copyCommandFromBuffer(command, buffer, minSize);
         if (i >= minSize) {
             fputs("Unknown command.\n", stderr);
             continue;
         }
-        command[i] = 0;
         while (i < status && buffer[i] == ' ') i++;
-
-        if (strcmp(command, PROTEGE) == 0)
-            protege(&(buffer[i]));
-        else if (strcmp(command, LIBERA) == 0)
-            libera(&(buffer[i]));
-        else if (strcmp(command, RODEVEJA) == 0)
-            rodeVeja(&(buffer[i]));
-        else if (strcmp(command, RODE) == 0)
-            rode(&(buffer[i]));
-        else if (strcmp(command, EXITCMD) == 0)
-            exit(EXIT_SUCCESS);
-        else {
+        status = executeCommand(command, &(buffer[i]));
+        if (status == 0) {
             if (command[0] != 0) 
                 fputs("Unknown command.", stderr);
             continue;
         }
+        else if (status == -1)
+            exit(EXIT_SUCCESS);
     }
 
     return 0;
