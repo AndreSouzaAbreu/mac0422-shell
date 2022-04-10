@@ -21,9 +21,7 @@ PAPER_PDF := ${PAPER}.pdf
 
 ${BIN}:
 
-theo:
-	gcc -Wall -Wextra mac422shellTheo.c -o tmac422shell
-	gcc test.c -o test
+${BIN}Theo:
 
 build: ${BIN}
 
@@ -35,6 +33,9 @@ install: build
 clean:
 	@rm -f ${DEST_DIR_SRC}/${SRC}
 	@rm -f ${DEST_DIR_BIN}/${BIN}
+
+tests:
+	for test in tests/*.c; do ${CC} ${CFLAGS} $${test} -o $${test/\.c/}; done
 
 #
 # transfer files between host and guest
@@ -51,11 +52,13 @@ init:
 #
 
 ${PAPER_PDF}: ${PAPER_MD}
-	pandoc --template college-report $^ -o $@
+	pandoc --template college-report-2 $^ -o $@
 
 paper: ${PAPER_PDF}
 
 watch:
 	echo ${PAPER_MD} | entr make paper
 
-.PHONY: build clean init install paper sync
+#
+# special tasks
+.PHONY: build clean init install paper sync tests
