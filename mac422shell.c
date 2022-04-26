@@ -59,16 +59,17 @@ static const command_t CMD_LIST[CMD_COUNT] = {
 int main(int argc, char** argv)
 {
     char cmd[30], arg[256];
+    int number_of_cmd_args = 2;
 
-    while (read_cmd(cmd, arg) == 2) {
+    while (read_cmd(cmd, arg) == number_of_cmd_args) {
         /* validate command */
         if (NOT cmd_exists(cmd)) {
-            printf("ERROR: invalid command %s\n", cmd);
+            fprintf(stderr, "ERROR: invalid command %s\n", cmd);
             continue;
         }
         /* execute command */
         if (call_cmd(cmd, arg) < 0) {
-            printf("ERROR: could not run command\n");
+            fprintf(stderr, "ERROR: could not run command\n");
             continue;
         }
     }
@@ -184,7 +185,7 @@ int rode_veja(char* filepath)
     waitpid(pid, &exit_status, 0);
 
     if (exit_status == -1) {
-        printf("ERROR: erro ao rodar o programa %s\n", filepath);
+        fprintf(stderr, "ERROR: erro ao rodar o programa %s\n", filepath);
     } else {
         /* the status is multiplied by 256, thus needs to convert it */
         printf("=> programa '%s' retornou codigo %d\n", filepath, WEXITSTATUS(exit_status));
